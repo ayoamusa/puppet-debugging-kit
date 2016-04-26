@@ -352,4 +352,4 @@ roles:
 
   pe-201611-agent:
     provisioners:
-      - {type: pe_bootstrap, master: 'pe-201533-master.puppetdebug.vlan', version: '2016.1.1'}
+      - {type: pe_bootstrap, master: 'pe-201611-master.puppetdebug.vlan', version: '2016.1.1'}

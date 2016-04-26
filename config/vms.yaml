@@ -31,7 +31,7 @@ vms:
 
   - name: pe-201611-master
     debug-kit: true
-    box: puppetlabs/centos-7.2-64-nocm
+    box: puppetlabs/centos-7.0-64-nocm
     roles:
       - pe-forward-console
       - pe-memory-tuning2
@@ -86,7 +86,29 @@ vms:
 
   - name: weblogic0
     debug-kit: true
-    box: puppetlabs/centos-7.2-64-nocm
+    box: rhel6-nitc-vmware
+    roles:
+      - pe-201611-agent
+      - el-stop-firewall
+      - el-fix-path
+      - weblogic-role
+      - 1gb-memory
+      - base
+
+  - name: weblogic1
+    debug-kit: true
+    box: puppetlabs/centos-6.6-64-nocm
+    roles:
+      - pe-201611-agent
+      - el-stop-firewall
+      - el-fix-path
+      - weblogic-role
+      - 1gb-memory
+      - base
+
+  - name: weblogic2
+    debug-kit: true
+    box: puppetlabs/centos-6.6-64-nocm
     roles:
       - pe-201611-agent
       - el-stop-firewall
