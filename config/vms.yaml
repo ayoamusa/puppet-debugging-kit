@@ -1,0 +1,96 @@
+---
+
+# Keep the default Vagrant SSH key. It's publicly available and thus
+# "insecure", but these VMs aren't for production use and having a well-known
+# key allows for easy automation and documentation.
+ssh:
+  insert_key: false
+
+vms:
+
+  # NOTE: All `box:` declarations in this example point to vagrantcloud.com
+  # and require Vagrant 1.5.0 or newer to function.
+  - name: pe-201533-master
+    debug-kit: true
+    box: puppetlabs/centos-7.2-64-nocm
+    roles:
+      - pe-forward-console
+      - pe-memory-tuning2
+      - el-stop-firewall
+      - el-fix-path
+      - 4gb-memory
+      - base
+
+  - name: pe-201533-agent
+    debug-kit: true
+    box: puppetlabs/centos-7.2-64-nocm
+    roles:
+      - el-stop-firewall
+      - el-fix-path
+      - base
+
+  - name: pe-201611-master
+    debug-kit: true
+    box: puppetlabs/centos-7.2-64-nocm
+    roles:
+      - pe-forward-console
+      - pe-memory-tuning2
+      - el-stop-firewall
+      - el-fix-path
+      - 4gb-memory
+      - base
+
+  - name: consul0
+    debug-kit: true
+    box: puppetlabs/centos-7.2-64-nocm
+    roles:
+      - pe-201611-agent
+      - el-stop-firewall
+      - el-fix-path
+      - consul_server-role
+      - 256mb-memory
+      - base
+
+  - name: consul1
+    debug-kit: true
+    box: puppetlabs/centos-7.2-64-nocm
+    roles:
+      - pe-201611-agent
+      - el-stop-firewall
+      - el-fix-path
+      - consul_server-role
+      - 256mb-memory
+      - base
+
+  - name: artifactory0
+    debug-kit: true
+    box: puppetlabs/centos-7.2-64-nocm
+    roles:
+      - pe-201611-agent
+      - el-stop-firewall
+      - el-fix-path
+      - artifactory-role
+      - 1gb-memory
+      - base
+
+  - name: artifactory_ui0
+    debug-kit: true
+    box: puppetlabs/centos-7.2-64-nocm
+    roles:
+      - pe-201611-agent
+      - el-stop-firewall
+      - el-fix-path
+      - artifactory-ui-role
+      - 1gb-memory
+      - base
+
+  - name: weblogic0
+    debug-kit: true
+    box: puppetlabs/centos-7.2-64-nocm
+    roles:
+      - pe-201611-agent
+      - el-stop-firewall
+      - el-fix-path
+      - weblogic-role
+      - 1gb-memory
+      - base
