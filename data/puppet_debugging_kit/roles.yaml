@@ -352,6 +352,6 @@ roles:
 
   pe-201611-agent:
     synced_folders:
-      - {host_path: 'src/puppetlabs', guest_path: '/puppetlabs'}
+      - {host_path: 'src', guest_path: '/src'}
     provisioners:
       - {type: pe_bootstrap, master: 'pe-201611-master.puppetdebug.vlan', version: '2016.1.1'}
