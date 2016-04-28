@@ -16,6 +16,8 @@ roles:
           vm_defaults:
             private_networks:
               - {auto_network: true}
+            synced_folders:
+              - {host_path: 'src', guest_path: '/vagrant'}
             provisioners:
               - type: hosts
                 name: 'base networking'
@@ -33,6 +35,8 @@ roles:
           vm_defaults:
             private_networks:
               - {auto_network: true}
+            synced_folders:
+              - {host_path: 'src', guest_path: '/vagrant'}
             provisioners:
               - type: hosts
                 name: 'base networking'
@@ -351,7 +355,5 @@ roles:
       - {type: pe_bootstrap, master: 'pe-201533-master.puppetdebug.vlan', version: '2015.3.3'}
 
   pe-201611-agent:
-    synced_folders:
-      - {host_path: 'src', guest_path: '/src'}
     provisioners:
       - {type: pe_bootstrap, master: 'pe-201611-master.puppetdebug.vlan', version: '2016.1.1'}
