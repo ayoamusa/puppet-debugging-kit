@@ -91,7 +91,7 @@ vms:
       - pe-201611-agent
       - el-stop-firewall
       - el-fix-path
-      - weblogic-role
+      - weblogic11g-role
       - 1gb-memory
       - base
 
@@ -108,7 +108,7 @@ vms:
 
   - name: weblogic_forms0
     debug-kit: true
-    box: autostructure/rhel6-nitc-nocm
+    box: autostructure-rhel6-nitc
     roles:
       - pe-201611-agent
       - el-stop-firewall
