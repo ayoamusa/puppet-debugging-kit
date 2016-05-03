@@ -86,7 +86,7 @@ vms:
 
   - name: weblogic0
     debug-kit: true
-    box: rhel6-nitc-vmware
+    box: autostructure-rhel6-nitc
     roles:
       - pe-201611-agent
       - el-stop-firewall
