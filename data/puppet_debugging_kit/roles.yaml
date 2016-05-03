@@ -117,16 +117,29 @@ roles:
           echo "  pp_application: artifactory_ui" >> /etc/puppetlabs/puppet/csr_attributes.yaml
           echo "  pp_apptier: dev" >> /etc/puppetlabs/puppet/csr_attributes.yaml
 
-  weblogic-role:
+  weblogic11g-role:
     provisioners:
       - type: shell
         inline: |
           mkdir -p /etc/puppetlabs/puppet
           echo "---" > /etc/puppetlabs/puppet/csr_attributes.yaml
           echo "extension_requests:" >> /etc/puppetlabs/puppet/csr_attributes.yaml
-          echo "  pp_role: weblogic" >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_role: weblogic11g" >> /etc/puppetlabs/puppet/csr_attributes.yaml
           echo "  pp_application: sample" >> /etc/puppetlabs/puppet/csr_attributes.yaml
           echo "  pp_apptier: dev" >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          mkdir -p /nfsroot/work/sysinfra
+
+  weblogic11g-forms-role:
+    provisioners:
+      - type: shell
+        inline: |
+          mkdir -p /etc/puppetlabs/puppet
+          echo "---" > /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "extension_requests:" >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_role: weblogic11g_forms" >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_application: sample" >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_apptier: dev" >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          mkdir -p /nfsroot/work/sysinfra
 
   # Adds /usr/local/bin to the PATH
   el-fix-path:

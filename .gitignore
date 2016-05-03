@@ -7,3 +7,4 @@ Gemfile.lock
 bin
 src/puppetlabs
 oracle_software
+nfsroot
