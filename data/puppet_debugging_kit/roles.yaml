@@ -16,8 +16,6 @@ roles:
           vm_defaults:
             private_networks:
               - {auto_network: true}
-#            synced_folders:
-#              - {host_path: 'nfsroot', guest_path: '/nfsroot', owner: 'oracle', group: 'oinstall'}
             provisioners:
               - type: hosts
                 name: 'base networking'
@@ -35,8 +33,6 @@ roles:
           vm_defaults:
             private_networks:
               - {auto_network: true}
-#            synced_folders:
-#              - {host_path: 'nfsroot', guest_path: '/nfsroot', owner: 'oracle', group: 'oinstall'}
             provisioners:
               - type: hosts
                 name: 'base networking'
