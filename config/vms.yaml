@@ -97,11 +97,12 @@ vms:
 
   - name: weblogic_forms0
     debug-kit: true
+    #box: puppetlabs/centos-7.2-64-nocm
     box: autostructure/rhel6-nitc-nocm
     roles:
       - pe-201611-agent
       - el-stop-firewall
       - el-fix-path
       - weblogic11g-forms-role
-      - 1gb-memory
+      - 4gb-memory
       - base
