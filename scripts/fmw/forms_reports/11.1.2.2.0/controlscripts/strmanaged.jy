@@ -1,0 +1,100 @@
+########################################################
+#Created by Greg Kenney, USDA Forest Service 12/02/2014#
+########################################################
+#
+# strmanaged.jy
+#
+# Script to start all WebLogic Managed Servers
+#
+# Start of functions
+#
+# Function to acquire server state
+def serverStatus(mserver):
+  cd('/ServerLifeCycleRuntimes/' + mserver )
+  return cmo.getState()
+#
+#Function to start Managed Servers
+def startServ(mserver):
+  start(mserver,'Server')
+#
+# End of functions
+#
+# Import required modules
+import socket
+import os
+import threading
+from socket import gethostname
+# End of module import
+#
+# Set variables
+whost = socket.getfqdn()
+domain = os.getenv('DOMAIN_NAME')
+domain_dir = os.getenv('DOMAIN_HOME')
+mwHome = '/opt/oracle/fmw/product/11.1.2'
+wurl = 't3://' + whost + ':1810'
+# End of variables 
+#
+# Define credential variables
+cfgfile = domain_dir + '/security/userconfigfile.secure'
+keyfile = domain_dir + '/security/userkeyfile.secure'
+# End credential variables
+#
+# 
+# Connect to the AdminServer
+connect(userConfigFile=cfgfile, userKeyFile=keyfile, url=wurl)
+#
+# Capture a list of Managed Servers
+servers = cmo.getServers()
+#
+# Change to the domainRuntime domain tree
+domainRuntime()
+#
+# Initialize threads list
+threads = []
+#
+# Initialize server_list
+server_list = []
+#
+# Loop through raw server list and capture server names only
+for server in servers:
+  # Do NOT capture AdminServer
+  if server.getName() != 'AdminServer':
+    server_list.append(server.getName())
+#
+# Loop through list of server names
+for mserver in server_list:
+  # Store Managed Server state
+  serverState = serverStatus(mserver)
+  # Attempt to start only if Managed Server is down
+  if serverState == "SHUTDOWN":
+    # Prepare thread
+    thread = threading.Thread(target=startServ, args=(mserver,))
+    # Execute thread
+    thread.start()
+    # Append thread to thread list
+    threads.append(thread)
+#
+# Join all threads to wait for them all to finish
+for t in threads:
+  t.join()
+#
+# Line space
+#
+# Loop through server_list
+for srv in server_list:
+  # Capture server state
+  serverState = serverStatus(srv)
+  # Print server state
+  print "Managed Server " + srv + " is " + serverState
+#
+# Line space
+print
+# Announce completion
+print "Completed."
+# Line space
+print
+#
+# Disconnect from AdminServer
+disconnect()
+# Exit WLST environment
+exit()

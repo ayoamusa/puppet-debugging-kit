@@ -86,7 +86,18 @@ vms:
 
   - name: weblogic0
     debug-kit: true
-    box: autostructure/rhel6-nitc-nocm
+    box: autostructure-rhel6-nitc
+    roles:
+      - pe-201611-agent
+      - el-stop-firewall
+      - el-fix-path
+      - weblogic11g-role
+      - 1gb-memory
+      - base
+
+  - name: weblogic1
+    debug-kit: true
+    box: puppetlabs/centos-6.6-64-nocm
     roles:
       - pe-201611-agent
       - el-stop-firewall
@@ -104,5 +115,5 @@ vms:
       - el-stop-firewall
       - el-fix-path
       - weblogic11g-forms-role
-      - 4gb-memory
+      - 2gb-memory
       - base

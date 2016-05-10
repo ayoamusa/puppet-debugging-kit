@@ -1,0 +1,29 @@
+########################################################
+#Created by Greg Kenney, USDA Forest Service 12/02/2014#
+########################################################
+#
+# storeconfig.jy
+#
+# Script for storing uname/pword encrypted after fsweblogic password change
+#
+# Define static variables
+import socket
+import os
+from socket import gethostname
+whost = socket.gethostname()
+domain = os.getenv('DOMAIN_NAME')
+domain_dir = os.getenv('DOMAIN_HOME')
+mwHome = '/opt/oracle/fmw/product/11.1.2'
+#
+# Define dynamic variables
+wurl = 't3://' + whost + ':1810'
+cfgfile = domain_dir + '/security/userconfigfile.secure'
+keyfile = domain_dir + '/security/userkeyfile.secure'
+#
+# Connect to the AdminServer
+connect(url=wurl)
+#
+# store credentials
+storeUserConfig(cfgfile, keyfile)
+disconnect()
+exit()

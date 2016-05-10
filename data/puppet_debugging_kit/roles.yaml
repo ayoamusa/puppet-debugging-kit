@@ -39,10 +39,10 @@ roles:
             private_networks:
               - {auto_network: true}
 #            synced_folders:
-#              - host_path:  'nfsroot'
-#                guest_path: '/nfsroot'
-#                owner:      nobody
-#                group:      nobody
+#              - host_path:  oracle_forms
+#                guest_path: /opt/oracle
+#                owner:      oracle
+#                group:      oinstall
             provisioners:
               - type: hosts
                 name: 'base networking'
@@ -150,6 +150,8 @@ roles:
           echo "  pp_application: sample" >> /etc/puppetlabs/puppet/csr_attributes.yaml
           echo "  pp_apptier: dev" >> /etc/puppetlabs/puppet/csr_attributes.yaml
           mkdir -p /nfsroot/work/sysinfra
+          lvextend -L+4G /dev/mapper/rootVG-optLV
+          resize2fs /dev/mapper/rootVG-optLV
 
   # Adds /usr/local/bin to the PATH
   el-fix-path:

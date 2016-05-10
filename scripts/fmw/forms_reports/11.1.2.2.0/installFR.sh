@@ -1,0 +1,418 @@
+#!/usr/bin/env bash
+
+##########################################################
+# Created by Greg Kenney, USDA Forest Service 12/02/2014 #
+##########################################################
+
+###################
+# Script Name    ##
+# installFR.sh   ##
+###################
+
+# (for Red Hat EL 6)
+
+#############################################
+####    Fusion Middleware/WebLogic 11g   ####
+#### Forms,Reports,HTTPServer,FMWControl ####
+####         Installation script         ####
+#############################################
+
+#capture current time and date
+NOW=$(date +"%m%d%y%H%M%S")
+
+#define log file name
+LOGFILE=installFR\_$NOW.log
+
+{
+
+# Procedure for defining session variables
+SET_VAR()
+{
+   MEDIA_SRC=/fslink/sysinfra/oracle/media/fmw
+   MEDIA_SRC2='\/fslink\/sysinfra\/oracle\/media\/fmw'
+   SCRIPT_SRC=/fslink/sysinfra/oracle/scripts/fmw
+   SCRIPT_SRC2='\/fslink\/sysinfra\/oracle\/scripts\/fmw'
+   ORACLE_BASE=/opt/oracle ; export ORACLE_BASE
+   ORACLE_BASE2='\/opt\/oracle'
+   MW_HOME=/opt/oracle/fmw/product/11.1.2 ; export MW_HOME
+   MW_HOME2='\/opt\/oracle\/fmw\/product\/11.1.2'
+   JAVA_HOME=/opt/oracle/fmw/product/11.1.2/jdk ; export JAVA_HOME
+   JAVA_HOME2='\/opt\/oracle\/fmw\/product\/11.1.2\/jdk' 
+   jdkfile=jdk-6u85-linux-x64.bin
+   jdkname=jdk1.6.0_85
+   WL_HOME=/opt/oracle/fmw/product/11.1.2/wlserver_10.3
+   WL_HOME2='\/opt\/oracle\/fmw\/product\/11.1.2\/wlserver_10.3'
+   ORACLE_HOME=/opt/oracle/fmw/product/11.1.2/oracle_fr ; export ORACLE_HOME
+   ORACLE_HOME2='\/opt\/oracle\/fmw\/product\/11.1.2\/oracle_fr'
+   ORACLE_INSTANCE=/opt/oracle/fmw/product/11.1.2/instances/frinst_1
+   ORACLE_INSTANCE2='\/opt\/oracle\/fmw\/product\/11.1.2\/instances\/frinst_1'
+   INSTANCE_NAME=frinst_1
+   STATIC_LOC=/fslink/sysinfra/oracle/scripts/fmw/forms_reports/11.1.2.2.0/staticports.ini
+   STATIC_LOC2='\/fslink\/sysinfra\/oracle\/scripts\/fmw\/forms_reports\/11.1.2.2.0\/staticports.ini'
+   PATH=/opt/oracle/fmw/product/11.1.2/jdk:$PATH ; export PATH
+   TMP=/tmp
+   DOMAIN_HOME=/opt/oracle/fmw/product/11.1.2/user_projects/domains/frdomain
+   wlsdomain=frdomain
+   domainloc=/opt/oracle/fmw/product/11.1.2/user_projects/domains
+   domainloc2='\/opt\/oracle\/fmw\/product\/11.1.2\/user_projects\/domains'
+   #define the inventory pointer file
+   orainst="/etc/oraInst.loc"
+   #identify timezone
+   DATE_TZ=`date |awk '{print $5}'`
+   if [ ! -z "$DATE_TZ" ] ; then
+      if [ "$DATE_TZ" == "CST" -o "$DATE_TZ" = "CDT" ] ; then
+         export TZ="US/Central"
+      elif [ "$DATE_TZ" == "EST" -o "$DATE_TZ" = "EDT" ] ; then
+	 export TZ="US/Eastern"
+      elif [ "$DATE_TZ" == "PST" -o "$DATE_TZ" = "PDT" ] ; then
+	 export TZ="US/Pacific"
+      elif [ "$DATE_TZ" == "MST" -o "$DATE_TZ" = "MDT" ] ; then
+         export TZ="US/Mountain"
+      else
+	 export TZ=""
+      fi
+   else
+      echo
+      echo "Unable to determine timezone from date command"
+      exit 1
+   fi
+}
+
+# Procedure for identifying hostname, fqdn, ipaddr
+GET_HOST()
+{
+   echo
+   echo "Identifying host..."
+   #identify hostname
+   h1=`hostname -s`
+   #identify fqdn
+   fqdn=`hostname -f`
+   #identify ip address
+   ip=`hostname -i`
+}
+
+# Procedure for verifying and creating MWHOME directory structure
+CHK_MWH()
+{
+   echo
+   echo "Checking if middleware home exists..."
+   #if the directory exists then dont try to create it
+   if [ -d "$MW_HOME" ] ; then
+      echo "done."
+   #otherwise we need to create the directory structure
+   else
+      echo "Creating middleware directory"
+      #create the directory structure
+      mkdir -p $MW_HOME
+      #make oracle:oinstall the owner
+      chown -R oracle:oinstall $MW_HOME
+      echo "done."
+   fi
+}
+
+# Procedure for creating oraInst.loc
+CHK_ORALOC()
+{
+   echo
+   echo "Checking for inventory pointer oraInst.loc..."
+   if [ -f "$orainst" ] ; then
+      echo "done."
+   else
+      echo "Inventory pointer not found ($orainst)"
+      exit 1
+   fi
+}
+
+#procedure for creating/capturing the WLS Admin account password
+WLS_PWD()
+{
+#prompt for a new WebLogic password
+   echo
+   wlspwd1=" "
+   echo "Please provide the password that will be used for the 'fsweblogic' administrator account. The password should be at least 8 characters long and contain both alpha and numeric characters. For better security consider using mixed case. Please avoid using special characters like '$' and '%'."
+   #loop to enforce 8 characters
+   echo
+   while [ `echo $wlspwd1 |wc -c` -lt "9" ] ; do
+      read -s -p "Type a password: " wlspwd1 ; echo
+   done
+   #end loop
+   #confirm password matches
+   read -s -p "Confirm password: " wlspwd2 ; echo
+   if [ "$wlspwd1" == "$wlspwd2" ] ; then
+      wlspwd="$wlspwd2"
+   else
+      #if password does not match then abort
+      echo
+      echo "Password does not match. Script aborted."
+      echo
+      exit
+   fi
+}
+
+#procedure for creating/populating response files
+BUILD_RSP()
+{
+   #if the response dir doesnt exist, create it
+   if [ ! -d "$MW_HOME/response" ] ; then
+      mkdir $MW_HOME/response
+   fi
+   #copy response file templates to middleware home
+   cp $SCRIPT_SRC/forms_reports/11.1.2.2.0/fr_ins_only.rsp $MW_HOME/response/fr_ins_only.1st
+   cp $SCRIPT_SRC/forms_reports/11.1.2.2.0/fr_cfg_only.rsp $MW_HOME/response/fr_cfg_only.1st
+   #populate ins response file with appropriate entries
+   sed -e s/ORACLE_HOME=/ORACLE_HOME=$ORACLE_HOME2/g -e s/MW_HOME=/MW_HOME=$MW_HOME2/g $MW_HOME/response/fr_ins_only.1st >$MW_HOME/response/fr_ins_only.rsp
+   #populate cfg response file with appropriate entries
+   sed -e s/DOMAIN_NAME=/DOMAIN_NAME=$wlsdomain/g -e s/DOMAIN_LOCATION=/DOMAIN_LOCATION=$domainloc2/g -e s/DOMAIN_HOSTNAME=/DOMAIN_HOSTNAME=$fqdn/g -e s/ADMIN_PASSWORD=/ADMIN_PASSWORD=$wlspwd/g -e s/ADMIN_CONFIRM_PASSWORD=/ADMIN_CONFIRM_PASSWORD=$wlspwd/g -e s/MW_HOME=/MW_HOME=$MW_HOME2/g -e s/WL_HOME=/WL_HOME=$WL_HOME2/g -e s/ORACLE_HOME=/ORACLE_HOME=$ORACLE_HOME2/g -e s/INSTANCE_HOME=/INSTANCE_HOME=$ORACLE_INSTANCE2/g -e s/INSTANCE_NAME=/INSTANCE_NAME=$INSTANCE_NAME/g -e s/'STATICPORT INI FILE LOCATION='/'STATICPORT INI FILE LOCATION='$STATIC_LOC2/g -e s/CONFIGURE_FORMS_BUILDER=/CONFIGURE_FORMS_BUILDER=$fbuilder/g -e s/CONFIGURE_REPORTS_BUILDER=/CONFIGURE_REPORTS_BUILDER=$rbuilder/g $MW_HOME/response/fr_cfg_only.1st >$MW_HOME/response/fr_cfg_only.rsp
+   #delete response template because we dont need it anymore
+   rm -f $MW_HOME/response/fr_cfg_only.1st
+}
+
+# UI for determining if builder tools need to be installed
+UI_RSP()
+{
+   #ask the user if we should configure Forms Builder
+   echo
+   echo "** DO NOT install Forms and Reports Builder Tools on Production Servers **"
+   echo
+   read -p "Include Forms Builder Tool with this installation (y/n)? " fb
+   if [ "$fb" != "y" -a "$fb" != "n" ] ; then
+      #if no valid response ask the question again
+      UI_RSP
+   else
+      if [ "$fb" == "y" ] ; then
+         #execute these procedures if Forms Builder should be included
+         fbuilder="true"
+      fi
+      if [ "$fb" == "n" ] ; then
+         #execute these procedures if Forms Builder should NOT be included
+         fbuilder="false"
+      fi
+   fi
+   read -p "Include Reports Builder Tool with this installation (y/n)? " rb
+   if [ "$rb" != "y" -a "$rb" != "n" ] ; then
+      #if no valid response ask the question again
+      UI_RSP
+   else
+      if [ "$rb" == "y" ] ; then
+         #execute these procedures if Forms Builder should be included
+         rbuilder="true"
+      fi
+      if [ "$rb" == "n" ] ; then
+         #execute these procedures if Forms Builder should NOT be included
+         rbuilder="false"
+      fi
+   fi
+}
+
+#procedure for installing the JDK
+INS_JDK ()
+{
+#command for installing JDK
+   #if the JDK doesnt exist, install it
+   if [ ! -d "$JAVA_HOME" ] ; then
+      echo
+      echo "Installing JDK...."
+      #copy JDK source file from media source
+      cp $MEDIA_SRC/java/jdk/1.6.0/$jdkfile $MW_HOME
+      #make current dir the middleware home
+      cd $MW_HOME
+      #install the JDK and use answer file to answer yes/no prompt
+      $MW_HOME/$jdkfile
+      #rename the created jdk dir to just jdk to make it universal
+      mv $MW_HOME/$jdkname $JAVA_HOME
+      #remove the jdk source file because we dont need it anymore
+      rm -f $MW_HOME/$jdkfile
+      #remove the answer file because we dont need it anymore
+   else
+      echo
+      echo "JDK directory already exists"
+   fi
+}
+
+#procedure for installing WebLogic Server
+INS_WLS()
+{
+#command for installing WLS
+   #as long as the JDK exists, start the WLS install
+   if [ -d "$JAVA_HOME" ] ; then
+      echo
+      echo "Installng WebLogic Server...."
+      echo "This may take a few minutes, please wait..."
+      #launch the WLS generic jar installer with specific jvm size
+      $JAVA_HOME/bin/java -d64 -Xmx1024m -jar $MEDIA_SRC/weblogic/10.3.6/wls1036_generic.jar -mode=silent -silent_xml=$SCRIPT_SRC/weblogic/10.3.6/wls_silent.xml 
+      echo "done."
+   else
+      echo
+      echo "JDK is missing"
+   fi
+}
+
+#procedure for installing Forms and Reports 11g
+INS_FR()
+{
+#command for installing Forms and Reports
+   echo "Installing Forms and Reports..."
+   $MEDIA_SRC/forms_reports/11.1.2.2.0/Disk1/runInstaller -silent -waitforcompletion -response $MW_HOME/response/fr_ins_only.rsp -invPtrLoc $orainst
+}
+
+#procedure for configuring Forms and Reports 11g
+CFG_FR()
+{
+#command for configuring Forms and Reports
+   echo "Initiating configuration phase..."
+   $ORACLE_HOME/bin/config.sh -silent -waitforcompletion -response $MW_HOME/response/fr_cfg_only.rsp 
+   #remove the cfg response file since it contains sensitive info
+   rm -f $MW_HOME/response/fr_cfg_only.rsp
+   rm -f /tmp/answer_file.txt
+}
+
+#procedure to copy control scripts to MW Home
+CPY_SCRIPTS ()
+{
+#copy start and shutdown scripts
+   echo
+   echo "Copying control scripts..."
+      cp $SCRIPT_SRC/forms_reports/11.1.2.2.0/controlscripts/* $MW_HOME
+      echo "done."
+}
+
+#update ohs to disable ssl
+UPDATE_OHS ()
+{
+   echo
+   echo "Updating httpd.conf..."
+   #make backup of httpd.conf
+   cp $ORACLE_INSTANCE/config/OHS/ohs1/httpd.conf $ORACLE_INSTANCE/config/OHS/ohs1/httpd.orig1
+   #disable ssl
+   sed -e '/ssl.conf/s/include/#include/g' $ORACLE_INSTANCE/config/OHS/ohs1/httpd.orig1 >$ORACLE_INSTANCE/config/OHS/ohs1/httpd.conf
+   echo "done."
+}
+
+#update jvm params in domain env script
+UPDATE_JVM ()
+{
+#jvm for weblogic
+   echo
+   echo "Updating default JVM parameters..."
+   if [ -e "$DOMAIN_HOME/bin/setDomainEnv.sh" ] ; then
+      #make backup of env script
+      cp $DOMAIN_HOME/bin/setDomainEnv.sh $DOMAIN_HOME/bin/setDomainEnv.orig
+      #set some initial JVM defaults
+      sed -e 's/XMS_SUN_64BIT=\"256\"/XMS_SUN_64BIT=\"512\"/g' -e 's/WLS_MEM_ARGS_64BIT=\"-Xms256m -Xmx512m\"/WLS_MEM_ARGS_64BIT=\"-Xms512m -Xmx512m\"/g' $DOMAIN_HOME/bin/setDomainEnv.orig >$DOMAIN_HOME/bin/setDomainEnv.sh
+      #reset execute permissions
+      chmod u+x $DOMAIN_HOME/bin/setDomainEnv.sh
+   fi
+#jvm for reports server
+   if [ -e "$ORACLE_INSTANCE/config/reports/bin/reports.sh" ] ; then
+      #make backup of env script
+      cp $ORACLE_INSTANCE/config/reports/bin/reports.sh $ORACLE_INSTANCE/config/reports/bin/reports.orig
+      #set report server jvm defaults
+      echo "REPORTS_JVM_OPTIONS=\"-Xms512m -Xmx512m\"; export REPORTS_JVM_OPTIONS" >>$ORACLE_INSTANCE/config/reports/bin/reports.sh
+   fi
+   echo "done."
+#jvm for emagent
+   emagentfile1="$ORACLE_INSTANCE/EMAGENT/emagent_frinst_1/sysman/config/emd.properties"
+   emagentfile2="$ORACLE_INSTANCE/EMAGENT/emagent_frinst_1/sysman/config/emd.prop.orig"
+   if [ -e $emagentfile1 ] ; then
+      #make backup of env script
+      cp $emagentfile1 $emagentfile2
+      #set some initial JVM defaults
+      sed -e 's/agentJavaDefines=/agentJavaDefines=-Xms256m -Xmx256m /g' $emagentfile2 >$emagentfile1
+   fi
+}
+
+#procedure for creating boot.properties
+BOOT_PROP ()
+{
+   #populate boot.properties with username and password value
+   #password will be encrypted after first restart of AdminServer
+   if [ -d "$DOMAIN_HOME/servers/AdminServer/security" ] ; then
+      echo "username=fsweblogic" >$DOMAIN_HOME/servers/AdminServer/security/boot.properties
+      echo "password=$wlspwd" >>$DOMAIN_HOME/servers/AdminServer/security/boot.properties
+      echo
+      echo "Encrypting boot.properties..."
+      echo "done."
+      echo
+      #then we need to restart the AdminServer to obfuscate pwd
+      #shutdown the AdminServer
+      $MW_HOME/stopAdmin.sh
+      #start node manager
+      echo
+      $MW_HOME/startNM.sh
+      #start the Admin Server (boot.properties will now be encrypted)
+      echo
+      $MW_HOME/startAdmin.sh
+      STOR_CFG
+   fi
+}
+
+#procedure to store encrypted WLS uname/pword for Managed Server start/stop
+STOR_CFG ()
+{
+#jython script for storing user config and key file
+   echo
+   echo "Creating WLS store..."
+   #temporarily copy boot.properties to domain dir for jython script
+   cp $DOMAIN_HOME/servers/AdminServer/security/boot.properties $DOMAIN_HOME
+   #create an answer file to avoid prompting user
+   echo "y" >$MW_HOME/answer.txt
+   #set domain environment
+   . $DOMAIN_HOME/bin/setDomainEnv.sh
+   #run the jython script quietly to store the config
+   cd $DOMAIN_HOME
+   java weblogic.WLST $MW_HOME/storeconfig.jy
+   #remove the temp answer file and temp boot.properties
+   rm -f $MW_HOME/answer.txt
+   rm -f $DOMAIN_HOME/boot.properties
+   echo "done."
+}
+
+##########################################################
+#############START RUNNING PROCEDURES#####################
+##########################################################
+   echo
+   echo "Initiating Forms and Reports Installation..."
+# Create answer file for auto-answering prompts
+   echo "yes" >$TMP/answer_file.txt
+# Set session variables
+   SET_VAR
+# Gather host information
+   GET_HOST
+# Verify mw_home dir created
+   CHK_MWH 
+# Verify oracle inventory pointer exists
+   CHK_ORALOC
+# Gather info from user for response files
+   UI_RSP
+# Have user create a password for weblogic
+   WLS_PWD
+# Build the response files
+   BUILD_RSP
+# Install JDK
+   INS_JDK
+# Install WebLogic Software
+   INS_WLS
+# Install Forms and Reports
+   INS_FR
+# Configure Forms and Reports (create wls domain)
+   CFG_FR
+# Copy control scripts to mw home
+   CPY_SCRIPTS
+# Update OHS (disable SSL)
+   UPDATE_OHS
+# Update JVM parameters
+   UPDATE_JVM
+# Create boot properties
+   BOOT_PROP
+#########################################################
+##############END RUNNING PROCEDURES#####################
+#########################################################
+echo
+echo "Script completed."
+
+#output to the log 
+} 2>&1 | tee /tmp/$LOGFILE
+   echo
+   echo "Log file for this script is /tmp/$LOGFILE" 
+   echo
+   exit 
