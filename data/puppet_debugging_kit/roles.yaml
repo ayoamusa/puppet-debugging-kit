@@ -43,6 +43,13 @@ roles:
 #                guest_path: /opt/oracle
 #                owner:      oracle
 #                group:      oinstall
+            synced_folders:
+              - host_path:  media
+                guest_path: /fslink/sysinfra/oracle2/media
+                #owner:      oracle
+                #group:      oinstall
+                #type:       nfs
+#/fslink/sysinfra/oracle/media/fmw/weblogic/10.3.6
             provisioners:
               - type: hosts
                 name: 'base networking'
@@ -149,9 +156,11 @@ roles:
           echo "  pp_role: weblogic11g_forms" >> /etc/puppetlabs/puppet/csr_attributes.yaml
           echo "  pp_application: sample" >> /etc/puppetlabs/puppet/csr_attributes.yaml
           echo "  pp_apptier: dev" >> /etc/puppetlabs/puppet/csr_attributes.yaml
-          mkdir -p /nfsroot/work/sysinfra
-          lvextend -L+4G /dev/mapper/rootVG-optLV
+          yum -y update
+          lvextend -L+3G /dev/mapper/rootVG-optLV
           resize2fs /dev/mapper/rootVG-optLV
+          lvextend -L+3G /dev/mapper/rootVG-rootLV
+          resize2fs /dev/mapper/rootVG-rootLV
 
   # Adds /usr/local/bin to the PATH
   el-fix-path:
@@ -194,7 +203,8 @@ roles:
           - [modifyvm, !ruby/sym id, '--memory', 4096]
       - type: vmware_fusion
         vmx:
-          memsize: 4096
+          memsize:  4096
+          numvcpus: 4
 
 
   # Puppet Open Source Roles
