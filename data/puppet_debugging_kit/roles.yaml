@@ -114,13 +114,37 @@ roles:
           echo "  pp_role: consul_server" >> /etc/puppetlabs/puppet/csr_attributes.yaml
 
   # Adds /usr/local/bin to the PATH
+  nwos-role:
+    provisioners:
+      - type: shell
+        inline: |
+          mkdir -p /etc/puppetlabs/puppet
+          echo "---" > /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "extension_requests:"    >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_role: tomcat"      >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_application: nwos" >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_apptier: dev"      >> /etc/puppetlabs/puppet/csr_attributes.yaml
+
+  # Adds /usr/local/bin to the PATH
+  crais-role:
+    provisioners:
+      - type: shell
+        inline: |
+          mkdir -p /etc/puppetlabs/puppet
+          echo "---" > /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "extension_requests:"      >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_role: tomcat_adf"    >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_application: crais"  >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_apptier: production" >> /etc/puppetlabs/puppet/csr_attributes.yaml
+
+  # Adds /usr/local/bin to the PATH
   artifactory-role:
     provisioners:
       - type: shell
         inline: |
           mkdir -p /etc/puppetlabs/puppet
           echo "---" > /etc/puppetlabs/puppet/csr_attributes.yaml
-          echo "extension_requests:" >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "extension_requests:"    >> /etc/puppetlabs/puppet/csr_attributes.yaml
           echo "  pp_role: artifactory" >> /etc/puppetlabs/puppet/csr_attributes.yaml
 
   artifactory-ui-role:
@@ -129,10 +153,10 @@ roles:
         inline: |
           mkdir -p /etc/puppetlabs/puppet
           echo "---" > /etc/puppetlabs/puppet/csr_attributes.yaml
-          echo "extension_requests:" >> /etc/puppetlabs/puppet/csr_attributes.yaml
-          echo "  pp_role: tomcat" >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "extension_requests:"              >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_role: tomcat"                >> /etc/puppetlabs/puppet/csr_attributes.yaml
           echo "  pp_application: artifactory_ui" >> /etc/puppetlabs/puppet/csr_attributes.yaml
-          echo "  pp_apptier: dev" >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_apptier: dev"                >> /etc/puppetlabs/puppet/csr_attributes.yaml
 
   weblogic11g-role:
     provisioners:

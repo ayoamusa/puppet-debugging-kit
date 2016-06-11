@@ -21,6 +21,28 @@ vms:
       - 4gb-memory
       - base
 
+  - name: nwos0
+    debug-kit: true
+    box: rhel6-nitc-40g
+    roles:
+      - pe-201611-agent
+      - el-stop-firewall
+      - el-fix-path
+      - nwos-role
+      - 256mb-memory
+      - base
+
+  - name: crais0
+    debug-kit: true
+    box: rhel6-nitc-40g
+    roles:
+      - pe-201611-agent
+      - el-stop-firewall
+      - el-fix-path
+      - crais-role
+      - 256mb-memory
+      - base
+
   - name: consul0
     debug-kit: true
     box: puppetlabs/centos-7.2-64-nocm
