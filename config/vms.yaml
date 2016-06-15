@@ -32,6 +32,17 @@ vms:
       - 256mb-memory
       - base
 
+  - name: frts0
+    debug-kit: true
+    box: rhel6-nitc-40g
+    roles:
+      - pe-201611-agent
+      - el-stop-firewall
+      - el-fix-path
+      - frts-role
+      - 256mb-memory
+      - base
+
   - name: crais0
     debug-kit: true
     box: rhel6-nitc-40g

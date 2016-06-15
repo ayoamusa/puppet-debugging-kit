@@ -120,10 +120,22 @@ roles:
         inline: |
           mkdir -p /etc/puppetlabs/puppet
           echo "---" > /etc/puppetlabs/puppet/csr_attributes.yaml
-          echo "extension_requests:"    >> /etc/puppetlabs/puppet/csr_attributes.yaml
-          echo "  pp_role: tomcat"      >> /etc/puppetlabs/puppet/csr_attributes.yaml
-          echo "  pp_application: nwos" >> /etc/puppetlabs/puppet/csr_attributes.yaml
-          echo "  pp_apptier: dev"      >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "extension_requests:"      >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_role: tomcat"        >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_application: nwos"   >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_apptier: production" >> /etc/puppetlabs/puppet/csr_attributes.yaml
+
+  # Adds /usr/local/bin to the PATH
+  frts-role:
+    provisioners:
+      - type: shell
+        inline: |
+          mkdir -p /etc/puppetlabs/puppet
+          echo "---" > /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "extension_requests:"      >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_role: tomcat"        >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_application: frts"   >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_apptier: production" >> /etc/puppetlabs/puppet/csr_attributes.yaml
 
   # Adds /usr/local/bin to the PATH
   crais-role:
