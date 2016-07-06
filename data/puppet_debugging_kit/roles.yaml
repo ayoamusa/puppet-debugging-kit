@@ -16,11 +16,6 @@ roles:
           vm_defaults:
             private_networks:
               - {auto_network: true}
-#            synced_folders:
-#              - host_path:  'nfsroot'
-#                guest_path: '/nfsroot'
-#                owner:      nobody
-#                group:      nobody
             provisioners:
               - type: hosts
                 name: 'base networking'
@@ -36,20 +31,11 @@ roles:
       - type: vmware_fusion
         overrides:
           vm_defaults:
-            private_networks:
-              - {auto_network: true}
+#            private_networks:
+#              - {auto_network: true}
 #            synced_folders:
-#              - host_path:  oracle_forms
-#                guest_path: /opt/oracle
-#                owner:      oracle
-#                group:      oinstall
-            synced_folders:
-              - host_path:  media
-                guest_path: /fslink/sysinfra/oracle2/media
-                #owner:      oracle
-                #group:      oinstall
-                #type:       nfs
-#/fslink/sysinfra/oracle/media/fmw/weblogic/10.3.6
+#              - host_path:  media
+#                guest_path: /fslink/sysinfra/oracle2/media
             provisioners:
               - type: hosts
                 name: 'base networking'
@@ -125,6 +111,12 @@ roles:
           echo "  pp_application: nwos"   >> /etc/puppetlabs/puppet/csr_attributes.yaml
           echo "  pp_apptier: production" >> /etc/puppetlabs/puppet/csr_attributes.yaml
 
+# Adds /usr/local/bin to the PATH
+  evalidator-role:
+    provisioners:
+      - type: shell
+        inline: |
+
   # Adds /usr/local/bin to the PATH
   frts-role:
     provisioners:
@@ -132,10 +124,21 @@ roles:
         inline: |
           mkdir -p /etc/puppetlabs/puppet
           echo "---" > /etc/puppetlabs/puppet/csr_attributes.yaml
-          echo "extension_requests:"      >> /etc/puppetlabs/puppet/csr_attributes.yaml
-          echo "  pp_role: tomcat"        >> /etc/puppetlabs/puppet/csr_attributes.yaml
-          echo "  pp_application: frts"   >> /etc/puppetlabs/puppet/csr_attributes.yaml
-          echo "  pp_apptier: production" >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "extension_requests:"    >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_role: tomcat"      >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_application: frts" >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_apptier: test"     >> /etc/puppetlabs/puppet/csr_attributes.yaml
+
+  frts_prod-role:
+    provisioners:
+      - type: shell
+        inline: |
+          mkdir -p /etc/puppetlabs/puppet
+          echo "---" > /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "extension_requests:"    >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_role: tomcat"      >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_application: frts" >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_apptier: production"     >> /etc/puppetlabs/puppet/csr_attributes.yaml
 
   # Adds /usr/local/bin to the PATH
   crais-role:
@@ -158,6 +161,34 @@ roles:
           echo "---" > /etc/puppetlabs/puppet/csr_attributes.yaml
           echo "extension_requests:"    >> /etc/puppetlabs/puppet/csr_attributes.yaml
           echo "  pp_role: artifactory" >> /etc/puppetlabs/puppet/csr_attributes.yaml
+
+  artifactory_mysql-role:
+    provisioners:
+      - type: shell
+        inline: |
+          mkdir -p /etc/puppetlabs/puppet
+          echo "---" > /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "extension_requests:"    >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_role: mysql" >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_application: artifactory"  >> /etc/puppetlabs/puppet/csr_attributes.yaml
+
+  artifactory_pro-role:
+    provisioners:
+      - type: shell
+        inline: |
+          mkdir -p /etc/puppetlabs/puppet
+          echo "---" > /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "extension_requests:"    >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_role: artifactory_pro" >> /etc/puppetlabs/puppet/csr_attributes.yaml
+
+  artifactory_ha-role:
+    provisioners:
+      - type: shell
+        inline: |
+          mkdir -p /etc/puppetlabs/puppet
+          echo "---" > /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "extension_requests:"    >> /etc/puppetlabs/puppet/csr_attributes.yaml
+          echo "  pp_role: artifactory_ha" >> /etc/puppetlabs/puppet/csr_attributes.yaml
 
   artifactory-ui-role:
     provisioners:
@@ -421,6 +452,6 @@ roles:
     provisioners:
       - {type: pe_bootstrap, master: 'pe-201533-master.puppetdebug.vlan', version: '2015.3.3'}
 
-  pe-201611-agent:
+  pe-201612-agent:
     provisioners:
-      - {type: pe_bootstrap, master: 'pe-201611-master.puppetdebug.vlan', version: '2016.1.1'}
+      - {type: pe_bootstrap, master: 'pe-201612-master.puppetdebug.vlan', version: '2016.1.2'}

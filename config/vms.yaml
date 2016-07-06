@@ -10,25 +10,57 @@ vms:
 
   # NOTE: All `box:` declarations in this example point to vagrantcloud.com
   # and require Vagrant 1.5.0 or newer to function.
-  - name: pe-201611-master
+  #- name: pe-201612-master
+  #  debug-kit: true
+  #  box: rhel6-nitc-40g
+  #  roles:
+  #    - pe-forward-console
+  #    - pe-memory-tuning2
+  #    - el-stop-firewall
+  #    - el-fix-path
+  #    - 4gb-memory
+  #    - base
+
+  - name: pe-201612-master
+    private_networks:
+      - ip: "10.20.1.10"
     debug-kit: true
-    box: puppetlabs/centos-7.2-64-nocm
+    box: rhel6-nitc-40g
     roles:
       - pe-forward-console
-      - pe-memory-tuning2
+      #- pe-memory-tuning2
       - el-stop-firewall
       - el-fix-path
       - 4gb-memory
+      - base
+
+  - name: pe-201612-agent
+    debug-kit: true
+    box: rhel6-nitc-40g
+    roles:
+      - el-stop-firewall
+      - el-fix-path
       - base
 
   - name: nwos0
     debug-kit: true
     box: rhel6-nitc-40g
     roles:
-      - pe-201611-agent
+      - pe-201612-agent
       - el-stop-firewall
       - el-fix-path
       - nwos-role
+      - 256mb-memory
+      - base
+
+  - name: evalidator0
+    debug-kit: true
+    box: rhel6-nitc-40g
+    roles:
+      - pe-201612-agent
+      - el-stop-firewall
+      - el-fix-path
+      - evalidator-role
       - 256mb-memory
       - base
 
@@ -36,10 +68,21 @@ vms:
     debug-kit: true
     box: rhel6-nitc-40g
     roles:
-      - pe-201611-agent
       - el-stop-firewall
       - el-fix-path
       - frts-role
+      - 256mb-memory
+      - base
+
+  - name: frts_prod0
+    private_networks:
+      - ip: "10.20.1.110"
+    debug-kit: true
+    box: rhel6-nitc-40g
+    roles:
+      - el-stop-firewall
+      - el-fix-path
+      - frts_prod-role
       - 256mb-memory
       - base
 
@@ -47,7 +90,7 @@ vms:
     debug-kit: true
     box: rhel6-nitc-40g
     roles:
-      - pe-201611-agent
+      - pe-201612-agent
       - el-stop-firewall
       - el-fix-path
       - crais-role
@@ -55,10 +98,11 @@ vms:
       - base
 
   - name: consul0
+    private_networks:
+      - ip: "10.20.1.100"
     debug-kit: true
-    box: puppetlabs/centos-7.2-64-nocm
+    box: rhel6-nitc-40g
     roles:
-      - pe-201611-agent
       - el-stop-firewall
       - el-fix-path
       - consul_server-role
@@ -66,10 +110,11 @@ vms:
       - base
 
   - name: consul1
+    private_networks:
+      - ip: "10.20.1.101"
     debug-kit: true
-    box: puppetlabs/centos-7.2-64-nocm
+    box: rhel6-nitc-40g
     roles:
-      - pe-201611-agent
       - el-stop-firewall
       - el-fix-path
       - consul_server-role
@@ -77,21 +122,73 @@ vms:
       - base
 
   - name: artifactory0
+    private_networks:
+      - ip: "10.20.1.102"
     debug-kit: true
-    box: puppetlabs/centos-7.2-64-nocm
+    box: rhel6-nitc-40g
     roles:
-      - pe-201611-agent
+      - pe-201612-agent
       - el-stop-firewall
       - el-fix-path
       - artifactory-role
       - 1gb-memory
       - base
 
+  - name: artifactory_mysql0
+    private_networks:
+      - ip: "10.20.1.103"
+    debug-kit: true
+    box: rhel6-nitc-40g
+    roles:
+      - pe-201612-agent
+      - el-stop-firewall
+      - el-fix-path
+      - artifactory_mysql-role
+      - 256mb-memory
+      - base
+
+  - name: artifactory_pro0
+    private_networks:
+      - ip: "10.20.1.104"
+    debug-kit: true
+    box: rhel6-nitc-40g
+    roles:
+      - pe-201612-agent
+      - el-stop-firewall
+      - el-fix-path
+      - artifactory_pro-role
+      - 1gb-memory
+      - base
+
+  - name: artifactory_ha0
+    private_networks:
+      - ip: "10.20.1.100"
+    debug-kit: true
+    box: rhel6-nitc-40g
+    roles:
+      - pe-201612-agent
+      - el-stop-firewall
+      - el-fix-path
+      - artifactory_ha-role
+      - 1gb-memory
+      - base
+
+  - name: artifactory_ha1
+    debug-kit: true
+    box: rhel6-nitc-40g
+    roles:
+      - pe-201612-agent
+      - el-stop-firewall
+      - el-fix-path
+      - artifactory_ha-role
+      - 1gb-memory
+      - base
+
   - name: artifactory_ui0
     debug-kit: true
-    box: puppetlabs/centos-7.2-64-nocm
+    box: rhel6-nitc-40g
     roles:
-      - pe-201611-agent
+      - pe-201612-agent
       - el-stop-firewall
       - el-fix-path
       - artifactory-ui-role
@@ -102,7 +199,7 @@ vms:
     debug-kit: true
     box: autostructure-rhel6-nitc
     roles:
-      - pe-201611-agent
+      - pe-201612-agent
       - el-stop-firewall
       - el-fix-path
       - weblogic11g-role
@@ -113,7 +210,7 @@ vms:
     debug-kit: true
     box: puppetlabs/centos-6.6-64-nocm
     roles:
-      - pe-201611-agent
+      - pe-201612-agent
       - el-stop-firewall
       - el-fix-path
       - weblogic11g-role
@@ -122,10 +219,10 @@ vms:
 
   - name: weblogicforms0
     debug-kit: true
-    #box: puppetlabs/centos-7.2-64-nocm
+    #box: rhel6-nitc-40g
     box: rhel6-nitc-40g
     roles:
-      - pe-201611-agent
+      - pe-201612-agent
       - el-stop-firewall
       - el-fix-path
       - weblogic11g-forms-role
